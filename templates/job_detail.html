@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ job.title }} <span class="tag">{{ job.status }}</span></h2>
+<p>{{ job.department }}<br>{{ job.description }}</p>
+<p><b>Required skills:</b> {{ job.required_skills or 'None set (manual review)' }}<br>
+<b>Auto-shortlist at:</b> {{ job.min_score }}% match</p>
+<form method="post" action="/recruiting/job/{{ job.job_id }}/toggle">
+  <button class="sm" type="submit">{{ 'Close job' if job.status == 'Open' else 'Reopen job' }}</button>
+</form>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, m in msgs %}
+    <p class="{{ 'err' if cat == 'err' else '' }}" style="{{ 'color:#15803d' if cat == 'ok' else '' }}"><b>{{ m }}</b></p>
+  {% endfor %}
+{% endwith %}
+
+<h3>Add Candidate (resume is scanned automatically)</h3>
+<form method="post" action="/recruiting/job/{{ job.job_id }}/candidate" enctype="multipart/form-data">
+  <input name="full_name" placeholder="Full name" required>
+  <input type="email" name="email" placeholder="Email" required>
+  <input name="phone" placeholder="Phone">
+  <label>Resume (PDF or DOCX)</label>
+  <input type="file" name="resume" accept=".pdf,.docx" required>
+  <button type="submit">Add &amp; Scan Resume</button>
+</form>
+
+<h3>Candidates</h3>
+<table>
+  <tr><th>Name</th><th>Email</th><th>Resume Match</th><th>Status</th><th>Action</th></tr>
+  {% for a in apps %}
+  <tr>
+    <td>{{ a.full_name }}<br><small>{{ a.phone }}</small></td>
+    <td>{{ a.email }}</td>
+    <td>
+      {% if a.match_score is not none %}
+        <b>{{ a.match_score }}%</b><br>
+        {% if a.matched_skills %}<small style="color:#15803d">✔ {{ a.matched_skills }}</small><br>{% endif %}
+        {% if a.missing_skills %}<small style="color:#b91c1c">✘ {{ a.missing_skills }}</small>{% endif %}
+      {% else %}
+        <small>Not scanned</small>
+      {% endif %}
+      {% if a.resume_path %}<br><a href="/recruiting/resume/{{ a.candidate_id }}" target="_blank"><small>View resume</small></a>{% endif %}
+    </td>
+    <td><span class="tag">{{ a.status }}</span></td>
+    <td>
+      {% if a.next %}
+      <form method="post" action="/recruiting/application/{{ a.application_id }}/move" style="display:inline">
+        <input type="hidden" name="action" value="next">
+        <button class="sm" type="submit">Move to {{ a.next }}</button>
+      </form>
+      <form method="post" action="/recruiting/application/{{ a.application_id }}/move" style="display:inline">
+        <input type="hidden" name="action" value="reject">
+        <button class="sm red" type="submit">Reject</button>
+      </form>
+      {% elif a.status == 'Hired' %}
+      Hired ✅
+      {% else %}
+      <form method="post" action="/recruiting/application/{{ a.application_id }}/move" style="display:inline">
+        <input type="hidden" name="action" value="shortlist">
+        <button class="sm" type="submit">Override: Shortlist</button>
+      </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5">No candidates yet.</td></tr>
+  {% endfor %}
+</table>
+<p><a href="/recruiting">&larr; Back to jobs</a></p>
+{% endblock %}
