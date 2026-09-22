@@ -5,7 +5,7 @@ load_dotenv()
 import pymysql
 from werkzeug.security import generate_password_hash
 
-db = pymysql.connect(host=os.environ.get("DB_HOST", "127.0.0.1"), user=os.environ.get("DB_USER", "root"), password=os.environ.get("DB_PASSWORD", ""), database="nexora")
+db = pymysql.connect(host=os.environ.get("DB_HOST", "127.0.0.1"), port=int(os.environ.get("DB_PORT", 3308)), user=os.environ.get("DB_USER", "root"), password=os.environ.get("DB_PASSWORD", ""), database="nexora")
 cur = db.cursor()
 users = [
     ("hr@nexora.com", "hr123", "HR"),
