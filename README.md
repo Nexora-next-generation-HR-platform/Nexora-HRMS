@@ -30,10 +30,11 @@ mysql:8.0
    - Click the lightning bolt icon (or `Ctrl+Shift+Enter`) to execute
 4. Copy `.env.example` to `.env` and fill in your DB password (leave `DB_PORT=3306` or remove that line since it's the default)
 5. Install packages:
+1.python -m venv venv
 
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
+2.venv\Scripts\activate
+
+3.pip install -r requirements.txt
 
 6. Add test users: `python seed_users.py`
 7. Run: `python app.py` and open http://127.0.0.1:5000
