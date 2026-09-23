@@ -169,8 +169,9 @@ def register(app, get_db, login_required):
                 if len(text.strip()) < 30:
                     message = "Candidate added, but the resume text could not be read (scanned PDF?). Review manually."
                 else:
-                    score, m, mi = scan(text, skills)
-                    matched, missing = ", ".join(m), ", ".join(mi)
+                    result = scan(text, skills, job.get("description", "") or "")
+                    score = result["score"]
+                    matched, missing = ", ".join(result["matched"]), ", ".join(result["missing"])
                     if score >= job["min_score"]:
                         status = "Shortlisted"
                         message = f"Resume scanned: {score}% match. Auto-SHORTLISTED."
