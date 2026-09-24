@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My Onboarding</h2>
+
+{# Remove this block if base.html already renders flashed messages #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}<p class="{{ category }}">{{ message }}</p>{% endfor %}
+{% endwith %}
+
+{% if not emp %}
+  <p>No employee record is linked to your account yet. Please contact HR.</p>
+{% elif not tasks %}
+  <p>No onboarding tasks have been assigned to you yet.</p>
+{% else %}
+  <p>{{ done }} of {{ tasks|length }} tasks completed ({{ percent }}%)</p>
+  <div style="background:#e5e7eb;border-radius:6px;height:10px;max-width:400px">
+    <div style="width:{{ percent }}%;background:#16a34a;height:10px;border-radius:6px"></div>
+  </div>
+
+  <table>
+    <tr><th>Task</th><th>Type</th><th>Status</th><th></th></tr>
+    {% for t in tasks %}
+    <tr>
+      <td>
+        <strong>{{ t.title }}</strong>
+        {% if t.description %}<br><small>{{ t.description }}</small>{% endif %}
+      </td>
+      <td><span class="tag">{{ t.task_type }}</span></td>
+      <td>
+        {% if t.status == 'Completed' %}
+          Done {{ t.completed_at.strftime('%d %b %Y') if t.completed_at }}
+        {% else %}
+          Pending
+        {% endif %}
+      </td>
+      <td>
+        {% if t.status == 'Pending' %}
+        <form method="post" action="/onboarding/task/{{ t.id }}/complete">
+          <button type="submit">Mark done</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+<p><a href="/dashboard">&larr; Back to dashboard</a></p>
+{% endblock %}

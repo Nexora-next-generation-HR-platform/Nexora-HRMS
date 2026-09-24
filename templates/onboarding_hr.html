@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Onboarding</h2>
+
+{# Remove this block if base.html already renders flashed messages #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}<p class="{{ category }}">{{ message }}</p>{% endfor %}
+{% endwith %}
+
+<h3>Hired candidates awaiting onboarding</h3>
+<table>
+  <tr><th>Name</th><th>Email</th><th>Job</th><th>Start onboarding</th></tr>
+  {% for h in hires %}
+  <tr>
+    <td>{{ h.full_name }}</td>
+    <td>{{ h.email }}</td>
+    <td>{{ h.title }}</td>
+    <td>
+      <form method="post" action="/onboarding/start/{{ h.application_id }}">
+        <input name="designation" placeholder="Designation">
+        <input type="date" name="join_date">
+        <button type="submit">Start</button>
+      </form>
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="4">No hired candidates waiting. Move an application to "Hired" in Recruiting first.</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Employees in onboarding</h3>
+<table>
+  <tr><th>Name</th><th>Department</th><th>Designation</th><th>Join date</th><th>Progress</th></tr>
+  {% for e in employees %}
+  <tr>
+    <td>{{ e.full_name }}</td>
+    <td>{{ e.department or '' }}</td>
+    <td>{{ e.designation or '' }}</td>
+    <td>{{ e.join_date or '' }}</td>
+    <td>{{ e.done }}/{{ e.total }} ({{ e.percent }}%)</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5">No employees yet.</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Task templates</h3>
+<table>
+  <tr><th>Title</th><th>Type</th></tr>
+  {% for t in tasks %}
+  <tr><td>{{ t.title }}</td><td><span class="tag">{{ t.task_type }}</span></td></tr>
+  {% else %}
+  <tr><td colspan="2">No tasks defined. Add one below, or run seed_onboarding.py.</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Add task</h3>
+<form method="post" action="/onboarding/task/new">
+  <input name="title" placeholder="Task title" maxlength="100" required>
+  <textarea name="description" rows="2" placeholder="Description"></textarea>
+  <select name="task_type">
+    {% for tt in task_types %}<option value="{{ tt }}">{{ tt }}</option>{% endfor %}
+  </select>
+  <button type="submit">Add task</button>
+</form>
+
+<p><a href="/dashboard">&larr; Back to dashboard</a></p>
+{% endblock %}
