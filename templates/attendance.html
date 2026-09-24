@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Attendance</h2>
+<p><a href="{{ url_for('dashboard') }}">← Back to dashboard</a></p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div style="padding:10px;margin:10px 0;border-radius:6px;
+                background:{{ '#dcfce7' if category == 'ok' else '#fee2e2' }};">
+      {{ message }}
+    </div>
+  {% endfor %}
+{% endwith %}
+
+{% if error %}
+  <p><strong>{{ error }}</strong></p>
+{% else %}
+  <p>Welcome, {{ employee.full_name }} ({{ employee.department }})</p>
+
+  <h3>Today</h3>
+  <p>Date: {{ today.work_date if today else "—" }}</p>
+  <p>Status: {{ today.status if today else "No record yet" }}</p>
+  <p>Check-in time: {{ today.check_in if today and today.check_in else "—" }}</p>
+  <p>Check-out time: {{ today.check_out if today and today.check_out else "—" }}</p>
+
+  <div style="display:flex;gap:10px;">
+    <form method="POST" action="{{ url_for('attendance_check_in') }}">
+      <button type="submit" {% if today and today.check_in %}disabled{% endif %}>
+        Check In
+      </button>
+    </form>
+
+    <form method="POST" action="{{ url_for('attendance_check_out') }}">
+      <button type="submit"
+        {% if not today or not today.check_in or today.check_out %}disabled{% endif %}>
+        Check Out
+      </button>
+    </form>
+  </div>
+
+  <h3>Attendance History</h3>
+  <table border="1" cellpadding="8" style="border-collapse:collapse;">
+    <tr>
+      <th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th>
+    </tr>
+    {% for row in history %}
+    <tr>
+      <td>{{ row.work_date }}</td>
+      <td>{{ row.check_in or "—" }}</td>
+      <td>{{ row.check_out or "—" }}</td>
+      <td>{{ row.status }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">No records yet.</td></tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+{% endblock %}

@@ -1,11 +1,13 @@
 from recruiting import register as register_recruiting
 from onboarding import register as register_onboarding
+from attendance import register as register_attendance
 from werkzeug.security import check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
 from functools import wraps
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -15,8 +17,12 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
 
 def get_db():
     return pymysql.connect(
-        host=os.environ.get("DB_HOST", "127.0.0.1"), port=int(os.environ.get("DB_PORT", 3308)), user=os.environ.get("DB_USER", "root"), password=os.environ.get("DB_PASSWORD", ""),
-        database="nexora", cursorclass=pymysql.cursors.DictCursor
+        host=os.environ.get("DB_HOST", "127.0.0.1"),
+        port=int(os.environ.get("DB_PORT", 3308)),
+        user=os.environ.get("DB_USER", "root"),
+        password=os.environ.get("DB_PASSWORD", ""),
+        database="nexora",
+        cursorclass=pymysql.cursors.DictCursor,
     )
 
 
@@ -92,6 +98,7 @@ def logout():
 
 register_recruiting(app, get_db, login_required)
 register_onboarding(app, get_db, login_required)
+register_attendance(app, get_db, login_required)
 
 if __name__ == "__main__":
     app.run(debug=True)
