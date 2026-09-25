@@ -18,7 +18,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
 def get_db():
     return pymysql.connect(
         host=os.environ.get("DB_HOST", "127.0.0.1"),
-        port=int(os.environ.get("DB_PORT", 3308)),
+        port=int(os.environ.get("DB_PORT", 3306)),
         user=os.environ.get("DB_USER", "root"),
         password=os.environ.get("DB_PASSWORD", ""),
         database="nexora",
@@ -100,5 +100,5 @@ register_recruiting(app, get_db, login_required)
 register_onboarding(app, get_db, login_required)
 register_attendance(app, get_db, login_required)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)  # still usable for browser-based dev/testing
