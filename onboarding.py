@@ -1,10 +1,12 @@
 import datetime
+import secrets
 from contextlib import contextmanager
 from functools import wraps
 
 import pymysql
 from flask import (render_template, request, redirect, url_for, session,
                    abort, flash)
+from werkzeug.security import generate_password_hash
 
 TASK_TYPES = ("Document", "Policy", "Training")  # must match the ENUM in schema.sql
 
@@ -170,11 +172,20 @@ def register(app, get_db, login_required):
                 flash("This candidate is already onboarded", "err")
                 return back
 
-            # Link to an existing login if one has the same email, else leave NULL.
-            # ASSUMPTION: only trusted staff create user accounts (there is no signup page).
+            # Link to an existing login if one has the same email; otherwise create
+            # one now, since there is no signup page an employee could use instead.
             cur.execute("SELECT user_id FROM users WHERE email = %s", (row["email"],))
             u = cur.fetchone()
-            user_id = u["user_id"] if u else None
+            temp_password = None
+            if u:
+                user_id = u["user_id"]
+            else:
+                temp_password = secrets.token_urlsafe(6)
+                cur.execute(
+                    "INSERT INTO users (email, password_hash, role_id) "
+                    "VALUES (%s, %s, (SELECT role_id FROM roles WHERE role_name = 'Employee'))",
+                    (row["email"], generate_password_hash(temp_password)))
+                user_id = cur.lastrowid
 
             try:
                 cur.execute(
@@ -195,9 +206,11 @@ def register(app, get_db, login_required):
                 "SELECT %s, task_id FROM onboarding_tasks", (emp_id,))
             assigned = cur.rowcount
 
-        note = "" if user_id else " No login is linked yet, so they cannot see their checklist."
-        flash(f"Onboarding started: {assigned} tasks assigned.{note}",
-              "ok" if user_id else "err")
+        if temp_password:
+            note = f" Login created — {row['email']} / temp password: {temp_password} (shown once, give this to the employee)."
+        else:
+            note = ""
+        flash(f"Onboarding started: {assigned} tasks assigned.{note}", "ok")
         return back
 
     @app.route("/onboarding/task/new", methods=["POST"])
