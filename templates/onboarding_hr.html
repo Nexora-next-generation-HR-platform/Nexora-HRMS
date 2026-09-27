@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Onboarding</h2>
+<p><a href="{{ url_for('training_hr') }}">Go to Training →</a></p>
 
 {# Remove this block if base.html already renders flashed messages #}
 {% with messages = get_flashed_messages(with_categories=true) %}

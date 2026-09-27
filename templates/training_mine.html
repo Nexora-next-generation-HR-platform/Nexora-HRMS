@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My Training</h2>
+
+{# Remove this block if base.html already renders flashed messages #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}<p class="{{ category }}">{{ message }}</p>{% endfor %}
+{% endwith %}
+
+{% if not emp %}
+  <p>No employee record is linked to your account yet. Please contact HR.</p>
+{% elif not assignments %}
+  <p>No training has been assigned to you yet.</p>
+{% else %}
+  <p>{{ done }} of {{ total }} trainings completed ({{ percent }}%)</p>
+  <div style="background:#e5e7eb;border-radius:6px;height:10px;max-width:400px">
+    <div style="width:{{ percent }}%;background:#16a34a;height:10px;border-radius:6px"></div>
+  </div>
+
+  <table>
+    <tr><th>Training</th><th>Progress</th><th>Status</th><th></th></tr>
+    {% for a in assignments %}
+    <tr>
+      <td>
+        <strong>{{ a.title }}</strong>
+        {% if a.description %}<br><small>{{ a.description }}</small>{% endif %}
+        {% if a.material_url %}<br><a href="{{ a.material_url }}" target="_blank">Open material</a>{% endif %}
+      </td>
+      <td>
+        <div style="background:#e5e7eb;border-radius:6px;height:8px;width:120px">
+          <div style="width:{{ a.progress_percent }}%;background:#2563eb;height:8px;border-radius:6px"></div>
+        </div>
+        {{ a.progress_percent }}%
+      </td>
+      <td>
+        {% if a.status == 'Completed' %}
+          Done {{ a.completed_at.strftime('%d %b %Y') if a.completed_at }}
+          {% if a.quiz_score is not none %}<br><small>Quiz score: {{ a.quiz_score }}</small>{% endif %}
+        {% else %}
+          <span class="tag">{{ a.status }}</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if a.status == 'Assigned' %}
+        <form method="post" action="/training/{{ a.assignment_id }}/start">
+          <button type="submit">Start</button>
+        </form>
+        {% elif a.status == 'In Progress' %}
+        <form method="post" action="/training/{{ a.assignment_id }}/progress" style="display:inline">
+          <input type="number" name="progress_percent" min="0" max="100" value="{{ a.progress_percent }}" style="width:60px">
+          <button type="submit">Update</button>
+        </form>
+        <form method="post" action="/training/{{ a.assignment_id }}/complete" style="display:inline">
+          <input type="number" name="quiz_score" min="0" max="100" placeholder="Quiz score" style="width:90px">
+          <button type="submit">Mark done</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endif %}
+
+<p><a href="/dashboard">&larr; Back to dashboard</a></p>
+{% endblock %}

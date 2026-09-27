@@ -1,6 +1,7 @@
 from recruiting import register as register_recruiting
 from onboarding import register as register_onboarding
 from attendance import register as register_attendance
+from training import register as register_training
 from werkzeug.security import check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
@@ -99,6 +100,7 @@ def logout():
 register_recruiting(app, get_db, login_required)
 register_onboarding(app, get_db, login_required)
 register_attendance(app, get_db, login_required)
+register_training(app, get_db, login_required)
 
 if __name__ == '__main__':
     app.run(debug=True)  # still usable for browser-based dev/testing

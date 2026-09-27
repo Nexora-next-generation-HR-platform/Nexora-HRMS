@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Training</h2>
+
+
+
+{# Remove this block if base.html already renders flashed messages #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}<p class="{{ category }}">{{ message }}</p>{% endfor %}
+{% endwith %}
+
+<h3>Trainings</h3>
+<table>
+  <tr><th>Title</th><th>Material</th><th>Completion</th><th>Assign</th></tr>
+  {% for t in trainings %}
+  <tr>
+    <td>
+      <strong>{{ t.title }}</strong>
+      {% if t.description %}<br><small>{{ t.description }}</small>{% endif %}
+    </td>
+    <td>{% if t.material_url %}<a href="{{ t.material_url }}" target="_blank">Link</a>{% else %}&mdash;{% endif %}</td>
+    <td>{{ t.completed }}/{{ t.assigned }} ({{ t.percent }}%)</td>
+    <td>
+      <details>
+        <summary>Assign employees</summary>
+        <form method="post" action="/training/{{ t.training_id }}/assign">
+          {% for e in employees %}
+          <label style="display:block">
+            <input type="checkbox" name="employee_ids" value="{{ e.employee_id }}">
+            {{ e.full_name }}{% if e.department %} ({{ e.department }}){% endif %}
+          </label>
+          {% else %}
+          <p>No employees yet.</p>
+          {% endfor %}
+          <button type="submit">Assign selected</button>
+        </form>
+      </details>
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="4">No trainings yet. Add one below.</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Add training</h3>
+<form method="post" action="/training/new">
+  <input name="title" placeholder="Training title" maxlength="100" required>
+  <textarea name="description" rows="2" placeholder="Description"></textarea>
+  <input name="material_url" placeholder="Material URL (optional)">
+  <button type="submit">Add training</button>
+</form>
+
+<p><a href="/dashboard">&larr; Back to dashboard</a></p>
+{% endblock %}
