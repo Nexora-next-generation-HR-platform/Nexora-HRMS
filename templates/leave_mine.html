@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>My Leave</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <p><strong>{{ message }}</strong></p>
+  {% endfor %}
+{% endwith %}
+
+<h3>Apply for Leave</h3>
+<form method="POST" action="{{ url_for('leave_apply') }}">
+  <select name="leave_type" required>
+    <option value="">-- Leave type --</option>
+    {% for t in leave_types %}
+      <option value="{{ t }}">{{ t }}</option>
+    {% endfor %}
+  </select><br><br>
+
+  <label>Start date: <input type="date" name="start_date" required></label><br><br>
+  <label>End date: <input type="date" name="end_date" required></label><br><br>
+  <textarea name="reason" placeholder="Reason (optional)"></textarea><br><br>
+  <button type="submit">Submit request</button>
+</form>
+
+<h3>My Requests</h3>
+<table border="1" cellpadding="6">
+  <tr>
+    <th>Type</th><th>Start</th><th>End</th><th>Reason</th><th>Status</th><th>Applied</th>
+  </tr>
+  {% for r in requests %}
+  <tr>
+    <td>{{ r.leave_type }}</td>
+    <td>{{ r.start_date }}</td>
+    <td>{{ r.end_date }}</td>
+    <td>{{ r.reason or "-" }}</td>
+    <td>{{ r.status }}</td>
+    <td>{{ r.applied_at }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="6">No leave requests yet.</td></tr>
+  {% endfor %}
+</table>
+
+<a href="{{ url_for('dashboard') }}">← Back to dashboard</a>
+{% endblock %}
