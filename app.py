@@ -1,11 +1,8 @@
 from recruiting import register as register_recruiting
 from onboarding import register as register_onboarding
 from attendance import register as register_attendance
-<<<<<<< HEAD
 from training import register as register_training
-=======
 from leave import register as register_leave
->>>>>>> bc56224 (leave page build Successfully)
 from werkzeug.security import check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
@@ -104,11 +101,8 @@ def logout():
 register_recruiting(app, get_db, login_required)
 register_onboarding(app, get_db, login_required)
 register_attendance(app, get_db, login_required)
-<<<<<<< HEAD
 register_training(app, get_db, login_required)
-=======
 register_leave(app, get_db, login_required)
->>>>>>> bc56224 (leave page build Successfully)
 
 if __name__ == '__main__':
     app.run(debug=True)  # still usable for browser-based dev/testing
